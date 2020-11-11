@@ -262,6 +262,7 @@ class ProduitFormState extends State<ProduitForm> {
           return 'Le nom doit contenir au moins deux caractères';
         } else {
           _produit.nom = value;
+          return null;
         }
       },
     );
