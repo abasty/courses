@@ -91,10 +91,7 @@ class DB {
   }
 }
 
-DB db;
-
 void main() {
-  db = DB();
   runApp(CoursesApp());
 }
 
@@ -106,6 +103,7 @@ class CoursesApp extends StatefulWidget {
 class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
   TabController tabController;
   var actionIcon = Icons.add;
+  DB db = DB();
 
   @override
   void initState() {
@@ -174,7 +172,7 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
     await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ProduitForm(nom),
+          builder: (context) => ProduitForm(nom, db),
         ));
     setState(() {});
   }
@@ -215,17 +213,19 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
 
 class ProduitForm extends StatefulWidget {
   final String nom;
+  final DB db;
 
-  ProduitForm(this.nom);
+  ProduitForm(this.nom, this.db);
 
   @override
   ProduitFormState createState() {
-    return ProduitFormState(nom);
+    return ProduitFormState(nom, db);
   }
 }
 
 class ProduitFormState extends State<ProduitForm> {
   final _formKey = GlobalKey<FormState>();
+  final DB db;
 
   Produit _produit;
   Rayon _rayon;
@@ -268,7 +268,7 @@ class ProduitFormState extends State<ProduitForm> {
     );
   }
 
-  ProduitFormState(String nom) {
+  ProduitFormState(String nom, this.db) {
     _produit =
         db.produitTable.firstWhere((p) => p.nom == nom, orElse: () => null);
     _new = _produit == null;
