@@ -1,11 +1,21 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'main.g.dart';
+
+@JsonSerializable()
 class Rayon {
   String nom;
 
   Rayon(this.nom);
+
+  factory Rayon.fromJson(Map<String, dynamic> json) => _$RayonFromJson(json);
+  Map<String, dynamic> toJson() => _$RayonToJson(this);
 }
 
+@JsonSerializable(explicitToJson: true)
 class Produit {
   String nom;
   Rayon rayon;
@@ -13,13 +23,19 @@ class Produit {
   bool fait = false;
 
   Produit(this.nom, this.rayon);
+  factory Produit.fromJson(Map<String, dynamic> json) =>
+      _$ProduitFromJson(json);
+  Map<String, dynamic> toJson() => _$ProduitToJson(this);
 }
 
+@JsonSerializable(explicitToJson: true)
 class DB {
+  @JsonKey(ignore: true)
   Rayon rayonDivers;
+  @JsonKey(ignore: true)
+  List<Produit> listeSelect = [];
   List<Rayon> rayonTable = [];
   List<Produit> produitTable = [];
-  List<Produit> listeSelect = [];
 
   DB() {
     rayonDivers = Rayon("Divers");
@@ -53,6 +69,7 @@ class DB {
     rayonTable.add(Rayon("Boulangerie"));
     rayonTable.add(Rayon("Hygiène"));
     rayonTable.add(Rayon("Boisson"));
+    print(toJson());
   }
 
   void produitPlus(Produit p) {
@@ -89,6 +106,9 @@ class DB {
       return fait;
     });
   }
+
+  factory DB.fromJson(Map<String, dynamic> json) => _$DBFromJson(json);
+  Map<String, dynamic> toJson() => _$DBToJson(this);
 }
 
 void main() {
