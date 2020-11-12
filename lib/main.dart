@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:convert' show jsonDecode;
 
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -30,46 +30,15 @@ class Produit {
 
 @JsonSerializable(explicitToJson: true)
 class DB {
+  List<Rayon> rayonTable = [];
+  List<Produit> produitTable = [];
+
   @JsonKey(ignore: true)
   Rayon rayonDivers;
   @JsonKey(ignore: true)
   List<Produit> listeSelect = [];
-  List<Rayon> rayonTable = [];
-  List<Produit> produitTable = [];
 
-  DB() {
-    // rayonDivers = Rayon("Divers");
-    // rayonTable.add(rayonDivers);
-    // Rayon r = Rayon("Boucherie");
-    // rayonTable.add(r);
-    // produitTable.addAll([
-    //   Produit("Escalope de porc", r),
-    //   Produit("Gîte de boeuf", r),
-    //   Produit("Paleron de boeuf", r),
-    // ]);
-    // r = Rayon("Légumes");
-    // rayonTable.add(r);
-    // rayonTable.add(Rayon("Fruits"));
-    // produitTable.addAll([
-    //   Produit("Pomme de terre", r),
-    //   Produit("Carotte", r),
-    //   Produit("Poireau", r),
-    // ]);
-    // r = Rayon("Epicerie");
-    // rayonTable.add(r);
-    // produitTable.addAll([
-    //   Produit("Sel", r),
-    //   Produit("Poivre", r),
-    //   Produit("Huile", r),
-    // ]);
-    // rayonTable.add(Rayon("Frais"));
-    // rayonTable.add(Rayon("Fromagerie"));
-    // rayonTable.add(Rayon("Poissonerie"));
-    // rayonTable.add(Rayon("Surgelés"));
-    // rayonTable.add(Rayon("Boulangerie"));
-    // rayonTable.add(Rayon("Hygiène"));
-    // rayonTable.add(Rayon("Boisson"));
-  }
+  DB();
 
   void produitPlus(Produit p) {
     if (++p.quantite == 1) {
@@ -106,18 +75,16 @@ class DB {
     });
   }
 
-  static Produit produitFromElement(dynamic e) {
-    if (e == null) {
-      return null;
-    }
-    Produit p = Produit.fromJson(e as Map<String, dynamic>);
-    Produit q = p;
-    print(p == q);
-    return p;
-  }
-
   static DB _$DBFromJson(Map<String, dynamic> json) {
     var db = DB();
+
+    Produit produitFromElement(dynamic e) {
+      if (e == null) return null;
+      Produit p = Produit.fromJson(e as Map<String, dynamic>);
+      Rayon r = db.rayonTable.singleWhere((e) => e.nom == p.rayon.nom);
+      p.rayon = r;
+      return p;
+    }
 
     db
       ..rayonTable = (json['rayonTable'] as List)
@@ -125,7 +92,9 @@ class DB {
               e == null ? null : Rayon.fromJson(e as Map<String, dynamic>))
           ?.toList()
       ..produitTable =
-          (json['produitTable'] as List)?.map(produitFromElement)?.toList();
+          (json['produitTable'] as List)?.map(produitFromElement)?.toList()
+      ..rayonDivers = db.rayonTable.singleWhere((e) => e.nom == "Divers")
+      ..listeSelect.addAll(db.produitTable.where((e) => e.quantite > 0));
     return db;
   }
 
@@ -146,7 +115,7 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
   TabController tabController;
   var actionIcon = Icons.add;
   DB db = DB.fromJson(jsonDecode(
-      '{"rayonTable":[{"nom":"Divers"},{"nom":"Boucherie"},{"nom":"Légumes"},{"nom":"Fruits"},{"nom":"Epicerie"},{"nom":"Frais"},{"nom":"Fromagerie"},{"nom":"Poissonerie"},{"nom":"Surgelés"},{"nom":"Boulangerie"},{"nom":"Hygiène"},{"nom":"Boisson"}],"produitTable":[{"nom":"Escalope de porc","rayon":{"nom":"Boucherie"},"quantite":0,"fait":false},{"nom":"Gîte de boeuf","rayon":{"nom":"Boucherie"},"quantite":0,"fait":false},{"nom":"Paleron de boeuf","rayon":{"nom":"Boucherie"},"quantite":0,"fait":false},{"nom":"Pomme de terre","rayon":{"nom":"Légumes"},"quantite":0,"fait":false},{"nom":"Carotte","rayon":{"nom":"Légumes"},"quantite":0,"fait":false},{"nom":"Poireau","rayon":{"nom":"Légumes"},"quantite":0,"fait":false},{"nom":"Sel","rayon":{"nom":"Epicerie"},"quantite":0,"fait":false},{"nom":"Poivre","rayon":{"nom":"Epicerie"},"quantite":0,"fait":false},{"nom":"Huile","rayon":{"nom":"Epicerie"},"quantite":0,"fait":false}]}'));
+      '{"rayonTable":[{"nom":"Divers"},{"nom":"Boucherie"},{"nom":"Légumes"},{"nom":"Fruits"},{"nom":"Epicerie"},{"nom":"Frais"},{"nom":"Fromagerie"},{"nom":"Poissonerie"},{"nom":"Surgelés"},{"nom":"Boulangerie"},{"nom":"Hygiène"},{"nom":"Boisson"}],"produitTable":[{"nom":"Escalope de porc","rayon":{"nom":"Boucherie"},"quantite":0,"fait":false},{"nom":"Gîte de boeuf","rayon":{"nom":"Boucherie"},"quantite":1,"fait":false},{"nom":"Paleron de boeuf","rayon":{"nom":"Boucherie"},"quantite":0,"fait":false},{"nom":"Pomme de terre","rayon":{"nom":"Légumes"},"quantite":0,"fait":false},{"nom":"Carotte","rayon":{"nom":"Légumes"},"quantite":4,"fait":false},{"nom":"Poireau","rayon":{"nom":"Légumes"},"quantite":0,"fait":false},{"nom":"Sel","rayon":{"nom":"Epicerie"},"quantite":0,"fait":false},{"nom":"Poivre","rayon":{"nom":"Epicerie"},"quantite":0,"fait":false},{"nom":"Huile","rayon":{"nom":"Epicerie"},"quantite":1,"fait":false}]}'));
 
   @override
   void initState() {
