@@ -208,6 +208,8 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
                   _buildTabProduits(context),
                   _buildTabListe(),
                 ]),
+                floatingActionButtonLocation:
+                    FloatingActionButtonLocation.centerFloat,
                 floatingActionButton: FloatingActionButton(
                   child: Icon(actionIcon),
                   onPressed: () {
