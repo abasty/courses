@@ -98,19 +98,15 @@ class DB {
     return db;
   }
 
-  factory DB.fromJsonFile() => DB.fromJson(readDB());
   factory DB.fromJson(Map<String, dynamic> json) => _$DBFromJson(json);
   Map<String, dynamic> toJson() => _$DBToJson(this);
 
-  Future<String> get _localPath async {
+  static Future<String> readDBFile() async {
     final directory = await getApplicationDocumentsDirectory();
-
-    return directory.path;
-  }
-
-  Future<File> get _localFile async {
-    final path = await _localPath;
-    return File('$path/DB.txt');
+    final path = directory.path + "/courses.json";
+    final file = File(path);
+    String contents = await file.readAsString();
+    return contents;
   }
 
   Future<int> readDB() async {
@@ -153,6 +149,8 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    // read db from file
+    DB.readDBFile().then((value) => print(value));
     tabController = TabController(vsync: this, length: 2)
       ..addListener(() {
         setState(() {
@@ -181,7 +179,7 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
                 IconButton(
                   icon: Icon(Icons.add_circle),
                   onPressed: () {
-                    setState(() => db.produitPlus(p));
+                    _iconPlusPressed(p);
                   },
                 ),
               ]),
@@ -194,6 +192,11 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
                 _editeProduit(context, p.nom);
               });
         });
+  }
+
+  void _iconPlusPressed(Produit p) {
+    setState(() => db.produitPlus(p));
+    db.writeDBFile();
   }
 
   Widget _buildTabListe() {
