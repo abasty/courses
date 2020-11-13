@@ -75,37 +75,34 @@ class DB {
     });
   }
 
-  static DB _$DBFromJson(Map<String, dynamic> json) {
-    var db = DB();
-
+  void fromJson(Map<String, dynamic> json) {
     Produit produitFromElement(dynamic e) {
       if (e == null) return null;
       Produit p = Produit.fromJson(e as Map<String, dynamic>);
-      Rayon r = db.rayonTable.singleWhere((e) => e.nom == p.rayon.nom);
+      Rayon r = rayonTable.singleWhere((e) => e.nom == p.rayon.nom);
       p.rayon = r;
       return p;
     }
 
-    db
+    this
       ..rayonTable = (json['rayonTable'] as List)
           ?.map((e) =>
               e == null ? null : Rayon.fromJson(e as Map<String, dynamic>))
           ?.toList()
       ..produitTable =
           (json['produitTable'] as List)?.map(produitFromElement)?.toList()
-      ..rayonDivers = db.rayonTable.singleWhere((e) => e.nom == "Divers")
-      ..listeSelect.addAll(db.produitTable.where((e) => e.quantite > 0));
-    return db;
+      ..rayonDivers = rayonTable.singleWhere((e) => e.nom == "Divers")
+      ..listeSelect.addAll(produitTable.where((e) => e.quantite > 0));
   }
 
   factory DB.fromJson(Map<String, dynamic> json) => _$DBFromJson(json);
   Map<String, dynamic> toJson() => _$DBToJson(this);
 
-  static Future<String> readDBFile() async {
+  Future<void> readDBFile() async {
     final directory = await getApplicationDocumentsDirectory();
     final path = directory.path + "/courses.json";
     final file = File(path);
-    return await file.readAsString();
+    fromJson(jsonDecode(await file.readAsString()));
   }
 
   Future<int> readDB() async {
@@ -142,14 +139,13 @@ class CoursesApp extends StatefulWidget {
 class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
   TabController tabController;
   var actionIcon = Icons.add;
-  DB db = DB.fromJson(jsonDecode(
-      '{"rayonTable":[{"nom":"Divers"},{"nom":"Boucherie"},{"nom":"Légumes"},{"nom":"Fruits"},{"nom":"Epicerie"},{"nom":"Frais"},{"nom":"Fromagerie"},{"nom":"Poissonerie"},{"nom":"Surgelés"},{"nom":"Boulangerie"},{"nom":"Hygiène"},{"nom":"Boisson"}],"produitTable":[{"nom":"Escalope de porc","rayon":{"nom":"Boucherie"},"quantite":0,"fait":false},{"nom":"Gîte de boeuf","rayon":{"nom":"Boucherie"},"quantite":1,"fait":false},{"nom":"Paleron de boeuf","rayon":{"nom":"Boucherie"},"quantite":0,"fait":false},{"nom":"Pomme de terre","rayon":{"nom":"Légumes"},"quantite":0,"fait":false},{"nom":"Carotte","rayon":{"nom":"Légumes"},"quantite":4,"fait":false},{"nom":"Poireau","rayon":{"nom":"Légumes"},"quantite":0,"fait":false},{"nom":"Sel","rayon":{"nom":"Epicerie"},"quantite":0,"fait":false},{"nom":"Poivre","rayon":{"nom":"Epicerie"},"quantite":0,"fait":false},{"nom":"Huile","rayon":{"nom":"Epicerie"},"quantite":1,"fait":false}]}'));
+  DB db = DB();
 
   @override
   void initState() {
     super.initState();
     // read db from file
-    DB.readDBFile().then((value) => print(value));
+    db.readDBFile().then((_) => setState(() {}));
     tabController = TabController(vsync: this, length: 2)
       ..addListener(() {
         setState(() {
