@@ -105,8 +105,7 @@ class DB {
     final directory = await getApplicationDocumentsDirectory();
     final path = directory.path + "/courses.json";
     final file = File(path);
-    String contents = await file.readAsString();
-    return contents;
+    return await file.readAsString();
   }
 
   Future<int> readDB() async {
@@ -172,7 +171,7 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
                 IconButton(
                   icon: Icon(Icons.remove_circle),
                   onPressed: () {
-                    setState(() => db.produitMoins(p));
+                    _iconMoinsPressed(p);
                   },
                 ),
                 Text(p.quantite.toString()),
@@ -185,8 +184,7 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
               ]),
               selected: p.quantite > 0,
               onTap: () {
-                setState(() =>
-                    p.quantite == 0 ? db.produitPlus(p) : db.produitZero(p));
+                _itemTap(p);
               },
               onLongPress: () {
                 _editeProduit(context, p.nom);
@@ -194,8 +192,18 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
         });
   }
 
+  void _iconMoinsPressed(Produit p) {
+    setState(() => db.produitMoins(p));
+    db.writeDBFile();
+  }
+
   void _iconPlusPressed(Produit p) {
     setState(() => db.produitPlus(p));
+    db.writeDBFile();
+  }
+
+  void _itemTap(Produit p) {
+    setState(() => p.quantite == 0 ? db.produitPlus(p) : db.produitZero(p));
     db.writeDBFile();
   }
 
@@ -209,11 +217,16 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
           subtitle: Text(p.rayon.nom),
           value: p.fait,
           onChanged: (bool value) {
-            setState(() => p.fait = value);
+            _checkBoxPressed(p, value);
           },
         );
       },
     );
+  }
+
+  void _checkBoxPressed(Produit p, bool value) {
+    setState(() => p.fait = value);
+    db.writeDBFile();
   }
 
   void _editeProduit(BuildContext context, String nom) async {
@@ -253,6 +266,7 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
                       _editeProduit(context, "");
                     } else {
                       setState(() => db.retireFaits());
+                      db.writeDBFile();
                     }
                   },
                 ),
@@ -341,6 +355,7 @@ class ProduitFormState extends State<ProduitForm> {
                 if (_formKey.currentState.validate()) {
                   if (_new) db.produitTable.add(_produit);
                   _produit.rayon = _rayon;
+                  db.writeDBFile();
                   Navigator.pop(context);
                 }
               },
