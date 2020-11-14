@@ -84,15 +84,14 @@ class DB {
       return p;
     }
 
-    this
-      ..rayonTable = (json['rayonTable'] as List)
-          ?.map((e) =>
-              e == null ? null : Rayon.fromJson(e as Map<String, dynamic>))
-          ?.toList()
-      ..produitTable =
-          (json['produitTable'] as List)?.map(produitFromElement)?.toList()
-      ..rayonDivers = rayonTable.singleWhere((e) => e.nom == "Divers")
-      ..listeSelect.addAll(produitTable.where((e) => e.quantite > 0));
+    rayonTable = (json['rayonTable'] as List)
+        ?.map(
+            (e) => e == null ? null : Rayon.fromJson(e as Map<String, dynamic>))
+        ?.toList();
+    produitTable =
+        (json['produitTable'] as List)?.map(produitFromElement)?.toList();
+    rayonDivers = rayonTable.singleWhere((e) => e.nom == "Divers");
+    listeSelect.addAll(produitTable.where((e) => e.quantite > 0));
   }
 
   factory DB.fromJson(Map<String, dynamic> json) => _$DBFromJson(json);
@@ -139,13 +138,12 @@ class CoursesApp extends StatefulWidget {
 class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
   TabController tabController;
   var actionIcon = Icons.add;
-  DB db = DB();
+  final _db = DB();
 
   @override
   void initState() {
     super.initState();
-    // read db from file
-    db.readDBFile().then((_) => setState(() {}));
+    _db.readDBFile().then((_) => setState(() {}));
     tabController = TabController(vsync: this, length: 2)
       ..addListener(() {
         setState(() {
@@ -155,11 +153,49 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
       });
   }
 
-  Widget _buildTabProduits(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Builder(builder: (context) => _buildScaffold(context)),
+    );
+  }
+
+  Scaffold _buildScaffold(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Courses'),
+        bottom: TabBar(
+          controller: tabController,
+          tabs: [
+            Tab(text: "Produits"),
+            Tab(text: "Liste"),
+          ],
+        ),
+      ),
+      body: TabBarView(controller: tabController, children: [
+        _buildTabProduits(),
+        _buildTabListe(),
+      ]),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingActionButton(
+        child: Icon(actionIcon),
+        onPressed: () {
+          if (tabController.index == 0) {
+            _editeProduit(context, "");
+          } else {
+            setState(() => _db.retireFaits());
+            _db.writeDBFile();
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildTabProduits() {
     return ListView.builder(
-        itemCount: db.produitTable.length,
+        itemCount: _db.produitTable.length,
         itemBuilder: (context, index) {
-          Produit p = db.produitTable[index];
+          Produit p = _db.produitTable[index];
           return ListTile(
               title: Text(p.nom),
               subtitle: Text(p.rayon.nom),
@@ -188,117 +224,124 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
         });
   }
 
-  void _iconMoinsPressed(Produit p) {
-    setState(() => db.produitMoins(p));
-    db.writeDBFile();
-  }
-
-  void _iconPlusPressed(Produit p) {
-    setState(() => db.produitPlus(p));
-    db.writeDBFile();
-  }
-
-  void _itemTap(Produit p) {
-    setState(() => p.quantite == 0 ? db.produitPlus(p) : db.produitZero(p));
-    db.writeDBFile();
-  }
-
   Widget _buildTabListe() {
     return ListView.builder(
-      itemCount: db.listeSelect.length,
+      itemCount: _db.listeSelect.length,
       itemBuilder: (context, index) {
-        Produit p = db.listeSelect[index];
+        Produit p = _db.listeSelect[index];
         return CheckboxListTile(
           title: Text("${p.nom} ${p.quantite > 1 ? '(${p.quantite})' : ''}"),
           subtitle: Text(p.rayon.nom),
           value: p.fait,
           onChanged: (bool value) {
-            _checkBoxPressed(p, value);
+            _checkBoxChanged(p, value);
           },
         );
       },
     );
   }
 
-  void _checkBoxPressed(Produit p, bool value) {
-    setState(() => p.fait = value);
-    db.writeDBFile();
+  void _iconMoinsPressed(Produit p) {
+    setState(() => _db.produitMoins(p));
+    _db.writeDBFile();
+  }
+
+  void _iconPlusPressed(Produit p) {
+    setState(() => _db.produitPlus(p));
+    _db.writeDBFile();
+  }
+
+  void _itemTap(Produit p) {
+    setState(() => p.quantite == 0 ? _db.produitPlus(p) : _db.produitZero(p));
+    _db.writeDBFile();
   }
 
   void _editeProduit(BuildContext context, String nom) async {
     await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ProduitForm(nom, db),
+          builder: (context) => ProduitForm(nom, _db),
         ));
     setState(() {});
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Builder(
-          builder: (context) => Scaffold(
-                appBar: AppBar(
-                  title: Text('Courses'),
-                  bottom: TabBar(
-                    controller: tabController,
-                    tabs: [
-                      Tab(text: "Produits"),
-                      Tab(text: "Liste"),
-                    ],
-                  ),
-                ),
-                body: TabBarView(controller: tabController, children: [
-                  _buildTabProduits(context),
-                  _buildTabListe(),
-                ]),
-                floatingActionButtonLocation:
-                    FloatingActionButtonLocation.centerFloat,
-                floatingActionButton: FloatingActionButton(
-                  child: Icon(actionIcon),
-                  onPressed: () {
-                    if (tabController.index == 0) {
-                      _editeProduit(context, "");
-                    } else {
-                      setState(() => db.retireFaits());
-                      db.writeDBFile();
-                    }
-                  },
-                ),
-              )),
-    );
+  void _checkBoxChanged(Produit p, bool value) {
+    setState(() => p.fait = value);
+    _db.writeDBFile();
   }
 }
 
 class ProduitForm extends StatefulWidget {
-  final String nom;
-  final DB db;
+  final String _nom;
+  final DB _db;
 
-  ProduitForm(this.nom, this.db);
+  ProduitForm(this._nom, this._db);
 
   @override
   ProduitFormState createState() {
-    return ProduitFormState(nom, db);
+    return ProduitFormState(_nom, _db);
   }
 }
 
 class ProduitFormState extends State<ProduitForm> {
   final _formKey = GlobalKey<FormState>();
-  final DB db;
+  final DB _db;
 
   Produit _produit;
   Rayon _rayon;
   bool _new;
 
+  ProduitFormState(String nom, this._db) {
+    _produit =
+        _db.produitTable.firstWhere((p) => p.nom == nom, orElse: () => null);
+    _new = _produit == null;
+    if (_new) _produit = Produit("", _db.rayonDivers);
+    _rayon = _produit.rayon;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          leading:
+              IconButton(icon: Icon(Icons.clear), onPressed: _annulePressed),
+          title: Text(_new ? "Création" : "Edition"),
+          centerTitle: true,
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.check),
+              onPressed: _validePressed,
+            ),
+          ],
+          backgroundColor: Colors.deepPurple,
+        ),
+        body: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Builder(builder: (context) => _buildForm()),
+        ));
+  }
+
+  void _annulePressed() {
+    Navigator.pop(context);
+  }
+
+  void _validePressed() {
+    if (_formKey.currentState.validate()) {
+      if (_new) _db.produitTable.add(_produit);
+      _produit.rayon = _rayon;
+      _db.writeDBFile();
+      Navigator.pop(context);
+    }
+  }
+
   Widget _buildRayonButtons() {
     return Expanded(
         child: ListView.builder(
-      itemCount: db.rayonTable.length,
+      itemCount: _db.rayonTable.length,
       itemBuilder: (context, index) {
         return RadioListTile<Rayon>(
-          title: Text(db.rayonTable[index].nom),
-          value: db.rayonTable[index],
+          title: Text(_db.rayonTable[index].nom),
+          value: _db.rayonTable[index],
           groupValue: _rayon,
           onChanged: (Rayon value) {
             setState(() {
@@ -328,48 +371,12 @@ class ProduitFormState extends State<ProduitForm> {
     );
   }
 
-  ProduitFormState(String nom, this.db) {
-    _produit =
-        db.produitTable.firstWhere((p) => p.nom == nom, orElse: () => null);
-    _new = _produit == null;
-    if (_new) _produit = Produit("", db.rayonDivers);
-    _rayon = _produit.rayon;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-              icon: Icon(Icons.clear), onPressed: () => Navigator.pop(context)),
-          title: Text(_new ? "Création" : "Edition"),
-          centerTitle: true,
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(Icons.check),
-              onPressed: () {
-                if (_formKey.currentState.validate()) {
-                  if (_new) db.produitTable.add(_produit);
-                  _produit.rayon = _rayon;
-                  db.writeDBFile();
-                  Navigator.pop(context);
-                }
-              },
-            ),
-          ],
-          backgroundColor: Colors.deepPurple,
-        ),
-        body: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Builder(
-              builder: (context) => Form(
-                  key: _formKey,
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildProduitNom(),
-                        _buildRayonButtons(),
-                      ]))),
-        ));
+  Form _buildForm() {
+    return Form(
+        key: _formKey,
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          _buildProduitNom(),
+          _buildRayonButtons(),
+        ]));
   }
 }
