@@ -145,12 +145,17 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
     super.initState();
     _db.readDBFile().then((_) => setState(() {}));
     tabController = TabController(vsync: this, length: 2)
-      ..addListener(() {
-        setState(() {
-          actionIcon =
-              tabController.index == 0 ? Icons.add : Icons.remove_shopping_cart;
-        });
-      });
+      ..addListener(
+        () {
+          setState(
+            () {
+              actionIcon = tabController.index == 0
+                  ? Icons.add
+                  : Icons.remove_shopping_cart;
+            },
+          );
+        },
+      );
   }
 
   @override
@@ -172,10 +177,13 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
           ],
         ),
       ),
-      body: TabBarView(controller: tabController, children: [
-        _buildTabProduits(),
-        _buildTabListe(),
-      ]),
+      body: TabBarView(
+        controller: tabController,
+        children: [
+          _buildTabProduits(),
+          _buildTabListe(),
+        ],
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
         child: Icon(actionIcon),
@@ -193,35 +201,40 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
 
   Widget _buildTabProduits() {
     return ListView.builder(
-        itemCount: _db.produitTable.length,
-        itemBuilder: (context, index) {
-          Produit p = _db.produitTable[index];
-          return ListTile(
-              title: Text(p.nom),
-              subtitle: Text(p.rayon.nom),
-              trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                IconButton(
-                  icon: Icon(Icons.remove_circle),
-                  onPressed: () {
-                    _iconMoinsPressed(p);
-                  },
-                ),
-                Text(p.quantite.toString()),
-                IconButton(
-                  icon: Icon(Icons.add_circle),
-                  onPressed: () {
-                    _iconPlusPressed(p);
-                  },
-                ),
-              ]),
-              selected: p.quantite > 0,
-              onTap: () {
-                _itemTap(p);
-              },
-              onLongPress: () {
-                _editeProduit(context, p.nom);
-              });
-        });
+      itemCount: _db.produitTable.length,
+      itemBuilder: (context, index) {
+        Produit p = _db.produitTable[index];
+        return ListTile(
+          title: Text(p.nom),
+          subtitle: Text(p.rayon.nom),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(Icons.remove_circle),
+                onPressed: () {
+                  _iconMoinsPressed(p);
+                },
+              ),
+              Text(p.quantite.toString()),
+              IconButton(
+                icon: Icon(Icons.add_circle),
+                onPressed: () {
+                  _iconPlusPressed(p);
+                },
+              ),
+            ],
+          ),
+          selected: p.quantite > 0,
+          onTap: () {
+            _itemTap(p);
+          },
+          onLongPress: () {
+            _editeProduit(context, p.nom);
+          },
+        );
+      },
+    );
   }
 
   Widget _buildTabListe() {
@@ -302,23 +315,23 @@ class ProduitFormState extends State<ProduitForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          leading:
-              IconButton(icon: Icon(Icons.clear), onPressed: _annulePressed),
-          title: Text(_new ? "Création" : "Edition"),
-          centerTitle: true,
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(Icons.check),
-              onPressed: _validePressed,
-            ),
-          ],
-          backgroundColor: Colors.deepPurple,
-        ),
-        body: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Builder(builder: (context) => _buildForm()),
-        ));
+      appBar: AppBar(
+        leading: IconButton(icon: Icon(Icons.clear), onPressed: _annulePressed),
+        title: Text(_new ? "Création" : "Edition"),
+        centerTitle: true,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.check),
+            onPressed: _validePressed,
+          ),
+        ],
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Builder(builder: (context) => _buildForm()),
+      ),
+    );
   }
 
   void _annulePressed() {
@@ -373,10 +386,14 @@ class ProduitFormState extends State<ProduitForm> {
 
   Form _buildForm() {
     return Form(
-        key: _formKey,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           _buildProduitNom(),
           _buildRayonButtons(),
-        ]));
+        ],
+      ),
+    );
   }
 }
