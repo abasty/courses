@@ -126,30 +126,26 @@ class DB {
   }
 }
 
-void main() {
-  runApp(CoursesApp());
-}
-
 class CoursesApp extends StatefulWidget {
   @override
   CoursesAppState createState() => CoursesAppState();
 }
 
 class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
-  TabController tabController;
-  var actionIcon = Icons.add;
+  TabController _tabController;
+  var _actionIcon = Icons.add;
   final _db = DB();
 
   @override
   void initState() {
     super.initState();
     _db.readDBFile().then((_) => setState(() {}));
-    tabController = TabController(vsync: this, length: 2)
+    _tabController = TabController(vsync: this, length: 2)
       ..addListener(
         () {
           setState(
             () {
-              actionIcon = tabController.index == 0
+              _actionIcon = _tabController.index == 0
                   ? Icons.add
                   : Icons.remove_shopping_cart;
             },
@@ -170,7 +166,7 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
       appBar: AppBar(
         title: Text('Courses'),
         bottom: TabBar(
-          controller: tabController,
+          controller: _tabController,
           tabs: [
             Tab(text: "Produits"),
             Tab(text: "Liste"),
@@ -178,7 +174,7 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
         ),
       ),
       body: TabBarView(
-        controller: tabController,
+        controller: _tabController,
         children: [
           _buildTabProduits(),
           _buildTabListe(),
@@ -186,9 +182,9 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
-        child: Icon(actionIcon),
+        child: Icon(_actionIcon),
         onPressed: () {
-          if (tabController.index == 0) {
+          if (_tabController.index == 0) {
             _editeProduit(context, "");
           } else {
             setState(() => _db.retireFaits());
@@ -396,4 +392,8 @@ class ProduitFormState extends State<ProduitForm> {
       ),
     );
   }
+}
+
+void main() {
+  runApp(CoursesApp());
 }
