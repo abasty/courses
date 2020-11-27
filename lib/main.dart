@@ -1,11 +1,21 @@
-import 'package:flutter/material.dart';
+import 'dart:convert' show jsonDecode;
 
+import 'package:flutter/material.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'main.g.dart';
+
+@JsonSerializable()
 class Rayon {
   String nom;
 
   Rayon(this.nom);
+
+  factory Rayon.fromJson(Map<String, dynamic> json) => _$RayonFromJson(json);
+  Map<String, dynamic> toJson() => _$RayonToJson(this);
 }
 
+@JsonSerializable(explicitToJson: true)
 class Produit {
   String nom;
   Rayon rayon;
@@ -13,47 +23,22 @@ class Produit {
   bool fait = false;
 
   Produit(this.nom, this.rayon);
+  factory Produit.fromJson(Map<String, dynamic> json) =>
+      _$ProduitFromJson(json);
+  Map<String, dynamic> toJson() => _$ProduitToJson(this);
 }
 
+@JsonSerializable(explicitToJson: true)
 class DB {
-  Rayon rayonDivers;
   List<Rayon> rayonTable = [];
   List<Produit> produitTable = [];
+
+  @JsonKey(ignore: true)
+  Rayon rayonDivers;
+  @JsonKey(ignore: true)
   List<Produit> listeSelect = [];
 
-  DB() {
-    rayonDivers = Rayon("Divers");
-    rayonTable.add(rayonDivers);
-    Rayon r = Rayon("Boucherie");
-    rayonTable.add(r);
-    produitTable.addAll([
-      Produit("Escalope de porc", r),
-      Produit("Gîte de boeuf", r),
-      Produit("Paleron de boeuf", r),
-    ]);
-    r = Rayon("Légumes");
-    rayonTable.add(r);
-    rayonTable.add(Rayon("Fruits"));
-    produitTable.addAll([
-      Produit("Pomme de terre", r),
-      Produit("Carotte", r),
-      Produit("Poireau", r),
-    ]);
-    r = Rayon("Epicerie");
-    rayonTable.add(r);
-    produitTable.addAll([
-      Produit("Sel", r),
-      Produit("Poivre", r),
-      Produit("Huile", r),
-    ]);
-    rayonTable.add(Rayon("Frais"));
-    rayonTable.add(Rayon("Fromagerie"));
-    rayonTable.add(Rayon("Poissonerie"));
-    rayonTable.add(Rayon("Surgelés"));
-    rayonTable.add(Rayon("Boulangerie"));
-    rayonTable.add(Rayon("Hygiène"));
-    rayonTable.add(Rayon("Boisson"));
-  }
+  DB();
 
   void produitPlus(Produit p) {
     if (++p.quantite == 1) {
@@ -89,10 +74,56 @@ class DB {
       return fait;
     });
   }
-}
 
-void main() {
-  runApp(CoursesApp());
+  void fromJson(Map<String, dynamic> json) {
+    Produit produitFromElement(dynamic e) {
+      if (e == null) return null;
+      Produit p = Produit.fromJson(e as Map<String, dynamic>);
+      Rayon r = rayonTable.singleWhere((e) => e.nom == p.rayon.nom);
+      p.rayon = r;
+      return p;
+    }
+
+    rayonTable = (json['rayonTable'] as List)
+        ?.map(
+            (e) => e == null ? null : Rayon.fromJson(e as Map<String, dynamic>))
+        ?.toList();
+    produitTable =
+        (json['produitTable'] as List)?.map(produitFromElement)?.toList();
+    rayonDivers = rayonTable.singleWhere((e) => e.nom == "Divers");
+    listeSelect.addAll(produitTable.where((e) => e.quantite > 0));
+  }
+
+  factory DB.fromJson(Map<String, dynamic> json) => _$DBFromJson(json);
+  Map<String, dynamic> toJson() => _$DBToJson(this);
+
+  Future<void> readDBFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final path = directory.path + "/courses.json";
+    final file = File(path);
+    fromJson(jsonDecode(await file.readAsString()));
+  }
+
+  Future<int> readDB() async {
+    try {
+      final file = await _localFile;
+
+      // Read the file
+      String contents = await file.readAsString();
+
+      return int.parse(contents);
+    } catch (e) {
+      // If encountering an error, return 0
+      return 0;
+    }
+  }
+
+  Future<File> writeDB() async {
+    final file = await _localFile;
+
+    // Write the file
+    return file.writeAsString('$DB');
+  }
 }
 
 class CoursesApp extends StatefulWidget {
@@ -101,144 +132,225 @@ class CoursesApp extends StatefulWidget {
 }
 
 class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
-  TabController tabController;
-  var actionIcon = Icons.add;
-  DB db = DB();
+  TabController _tabController;
+  var _actionIcon = Icons.add;
+  final _db = DB();
 
   @override
   void initState() {
     super.initState();
-    tabController = TabController(vsync: this, length: 2)
-      ..addListener(() {
-        setState(() {
-          actionIcon =
-              tabController.index == 0 ? Icons.add : Icons.remove_shopping_cart;
-        });
-      });
+    _db.readDBFile().then((_) => setState(() {}));
+    _tabController = TabController(vsync: this, length: 2)
+      ..addListener(
+        () {
+          setState(
+            () {
+              _actionIcon = _tabController.index == 0
+                  ? Icons.add
+                  : Icons.remove_shopping_cart;
+            },
+          );
+        },
+      );
   }
 
-  Widget _buildTabProduits(BuildContext context) {
-    return ListView.builder(
-        itemCount: db.produitTable.length,
-        itemBuilder: (context, index) {
-          Produit p = db.produitTable[index];
-          return ListTile(
-              title: Text(p.nom),
-              subtitle: Text(p.rayon.nom),
-              trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                IconButton(
-                  icon: Icon(Icons.remove_circle),
-                  onPressed: () {
-                    setState(() => db.produitMoins(p));
-                  },
-                ),
-                Text(p.quantite.toString()),
-                IconButton(
-                  icon: Icon(Icons.add_circle),
-                  onPressed: () {
-                    setState(() => db.produitPlus(p));
-                  },
-                ),
-              ]),
-              selected: p.quantite > 0,
-              onTap: () {
-                setState(() =>
-                    p.quantite == 0 ? db.produitPlus(p) : db.produitZero(p));
-              },
-              onLongPress: () {
-                _editeProduit(context, p.nom);
-              });
-        });
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Builder(builder: (context) => _buildScaffold(context)),
+    );
   }
 
-  Widget _buildTabListe() {
+  Scaffold _buildScaffold(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Courses'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: [
+            Tab(text: "Produits"),
+            Tab(text: "Liste"),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildTabProduits(),
+          _buildTabListe(),
+        ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FloatingActionButton(
+        child: Icon(_actionIcon),
+        onPressed: () {
+          if (_tabController.index == 0) {
+            _editeProduit(context, "");
+          } else {
+            setState(() => _db.retireFaits());
+            _db.writeDBFile();
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildTabProduits() {
     return ListView.builder(
-      itemCount: db.listeSelect.length,
+      itemCount: _db.produitTable.length,
       itemBuilder: (context, index) {
-        Produit p = db.listeSelect[index];
-        return CheckboxListTile(
-          title: Text("${p.nom} ${p.quantite > 1 ? '(${p.quantite})' : ''}"),
+        Produit p = _db.produitTable[index];
+        return ListTile(
+          title: Text(p.nom),
           subtitle: Text(p.rayon.nom),
-          value: p.fait,
-          onChanged: (bool value) {
-            setState(() => p.fait = value);
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(Icons.remove_circle),
+                onPressed: () {
+                  _iconMoinsPressed(p);
+                },
+              ),
+              Text(p.quantite.toString()),
+              IconButton(
+                icon: Icon(Icons.add_circle),
+                onPressed: () {
+                  _iconPlusPressed(p);
+                },
+              ),
+            ],
+          ),
+          selected: p.quantite > 0,
+          onTap: () {
+            _itemTap(p);
+          },
+          onLongPress: () {
+            _editeProduit(context, p.nom);
           },
         );
       },
     );
   }
 
+  Widget _buildTabListe() {
+    return ListView.builder(
+      itemCount: _db.listeSelect.length,
+      itemBuilder: (context, index) {
+        Produit p = _db.listeSelect[index];
+        return CheckboxListTile(
+          title: Text("${p.nom} ${p.quantite > 1 ? '(${p.quantite})' : ''}"),
+          subtitle: Text(p.rayon.nom),
+          value: p.fait,
+          onChanged: (bool value) {
+            _checkBoxChanged(p, value);
+          },
+        );
+      },
+    );
+  }
+
+  void _iconMoinsPressed(Produit p) {
+    setState(() => _db.produitMoins(p));
+    _db.writeDBFile();
+  }
+
+  void _iconPlusPressed(Produit p) {
+    setState(() => _db.produitPlus(p));
+    _db.writeDBFile();
+  }
+
+  void _itemTap(Produit p) {
+    setState(() => p.quantite == 0 ? _db.produitPlus(p) : _db.produitZero(p));
+    _db.writeDBFile();
+  }
+
   void _editeProduit(BuildContext context, String nom) async {
     await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ProduitForm(nom, db),
+          builder: (context) => ProduitForm(nom, _db),
         ));
     setState(() {});
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Builder(
-          builder: (context) => Scaffold(
-                appBar: AppBar(
-                  title: Text('Courses'),
-                  bottom: TabBar(
-                    controller: tabController,
-                    tabs: [
-                      Tab(text: "Produits"),
-                      Tab(text: "Liste"),
-                    ],
-                  ),
-                ),
-                body: TabBarView(controller: tabController, children: [
-                  _buildTabProduits(context),
-                  _buildTabListe(),
-                ]),
-                floatingActionButton: FloatingActionButton(
-                  child: Icon(actionIcon),
-                  onPressed: () {
-                    if (tabController.index == 0) {
-                      _editeProduit(context, "");
-                    } else {
-                      setState(() => db.retireFaits());
-                    }
-                  },
-                ),
-              )),
-    );
+  void _checkBoxChanged(Produit p, bool value) {
+    setState(() => p.fait = value);
+    _db.writeDBFile();
   }
 }
 
 class ProduitForm extends StatefulWidget {
-  final String nom;
-  final DB db;
+  final String _nom;
+  final DB _db;
 
-  ProduitForm(this.nom, this.db);
+  ProduitForm(this._nom, this._db);
 
   @override
   ProduitFormState createState() {
-    return ProduitFormState(nom, db);
+    return ProduitFormState(_nom, _db);
   }
 }
 
 class ProduitFormState extends State<ProduitForm> {
   final _formKey = GlobalKey<FormState>();
-  final DB db;
+  final DB _db;
 
   Produit _produit;
   Rayon _rayon;
   bool _new;
 
+  ProduitFormState(String nom, this._db) {
+    _produit =
+        _db.produitTable.firstWhere((p) => p.nom == nom, orElse: () => null);
+    _new = _produit == null;
+    if (_new) _produit = Produit("", _db.rayonDivers);
+    _rayon = _produit.rayon;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(icon: Icon(Icons.clear), onPressed: _annulePressed),
+        title: Text(_new ? "Création" : "Edition"),
+        centerTitle: true,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.check),
+            onPressed: _validePressed,
+          ),
+        ],
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Builder(builder: (context) => _buildForm()),
+      ),
+    );
+  }
+
+  void _annulePressed() {
+    Navigator.pop(context);
+  }
+
+  void _validePressed() {
+    if (_formKey.currentState.validate()) {
+      if (_new) _db.produitTable.add(_produit);
+      _produit.rayon = _rayon;
+      _db.writeDBFile();
+      Navigator.pop(context);
+    }
+  }
+
   Widget _buildRayonButtons() {
     return Expanded(
         child: ListView.builder(
-      itemCount: db.rayonTable.length,
+      itemCount: _db.rayonTable.length,
       itemBuilder: (context, index) {
         return RadioListTile<Rayon>(
-          title: Text(db.rayonTable[index].nom),
-          value: db.rayonTable[index],
+          title: Text(_db.rayonTable[index].nom),
+          value: _db.rayonTable[index],
           groupValue: _rayon,
           onChanged: (Rayon value) {
             setState(() {
@@ -268,47 +380,20 @@ class ProduitFormState extends State<ProduitForm> {
     );
   }
 
-  ProduitFormState(String nom, this.db) {
-    _produit =
-        db.produitTable.firstWhere((p) => p.nom == nom, orElse: () => null);
-    _new = _produit == null;
-    if (_new) _produit = Produit("", db.rayonDivers);
-    _rayon = _produit.rayon;
+  Form _buildForm() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildProduitNom(),
+          _buildRayonButtons(),
+        ],
+      ),
+    );
   }
+}
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-              icon: Icon(Icons.clear), onPressed: () => Navigator.pop(context)),
-          title: Text(_new ? "Création" : "Edition"),
-          centerTitle: true,
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(Icons.check),
-              onPressed: () {
-                if (_formKey.currentState.validate()) {
-                  if (_new) db.produitTable.add(_produit);
-                  _produit.rayon = _rayon;
-                  Navigator.pop(context);
-                }
-              },
-            ),
-          ],
-          backgroundColor: Colors.deepPurple,
-        ),
-        body: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Builder(
-              builder: (context) => Form(
-                  key: _formKey,
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildProduitNom(),
-                        _buildRayonButtons(),
-                      ]))),
-        ));
-  }
+void main() {
+  runApp(CoursesApp());
 }
