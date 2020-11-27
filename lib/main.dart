@@ -6,8 +6,6 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
-// <https://stackoverflow.com/questions/44816042/flutter-read-text-file-from-assets>
-
 part 'main.g.dart';
 
 @JsonSerializable()
@@ -106,12 +104,14 @@ class DB {
     final directory = await getApplicationDocumentsDirectory();
     final path = directory.path + "/courses.json";
     final file = File(path);
+    String json;
     if (file.existsSync()) {
-      fromJson(jsonDecode(file.readAsStringSync()));
+      json = file.readAsStringSync();
     } else {
       // Load from bundle assets
-      print("File does not exist");
+      json = await rootBundle.loadString("assets/courses.json");
     }
+    fromJson(jsonDecode(json));
   }
 
   Future<void> writeDBFile() async {

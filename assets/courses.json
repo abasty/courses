@@ -13,7 +13,7 @@
             "nom": "Fruits"
         },
         {
-            "nom": "Epicerie"
+            "nom": "Épicerie"
         },
         {
             "nom": "Frais"
@@ -43,7 +43,7 @@
             "rayon": {
                 "nom": "Boucherie"
             },
-            "quantite": 5,
+            "quantite": 0,
             "fait": false
         },
         {
@@ -51,7 +51,7 @@
             "rayon": {
                 "nom": "Boucherie"
             },
-            "quantite": 2,
+            "quantite": 0,
             "fait": false
         },
         {
@@ -59,7 +59,7 @@
             "rayon": {
                 "nom": "Boucherie"
             },
-            "quantite": 1,
+            "quantite": 0,
             "fait": false
         },
         {
@@ -67,7 +67,7 @@
             "rayon": {
                 "nom": "Légumes"
             },
-            "quantite": 2,
+            "quantite": 0,
             "fait": false
         },
         {
@@ -89,57 +89,9 @@
         {
             "nom": "Sel",
             "rayon": {
-                "nom": "Epicerie"
-            },
-            "quantite": 3,
-            "fait": false
-        },
-        {
-            "nom": "Poivre",
-            "rayon": {
-                "nom": "Epicerie"
+                "nom": "Épicerie"
             },
             "quantite": 0,
-            "fait": false
-        },
-        {
-            "nom": "Huile",
-            "rayon": {
-                "nom": "Epicerie"
-            },
-            "quantite": 0,
-            "fait": false
-        },
-        {
-            "nom": "Yaourt",
-            "rayon": {
-                "nom": "Frais"
-            },
-            "quantite": 1,
-            "fait": false
-        },
-        {
-            "nom": "Fromages",
-            "rayon": {
-                "nom": "Fromagerie"
-            },
-            "quantite": 0,
-            "fait": false
-        },
-        {
-            "nom": "Poissons",
-            "rayon": {
-                "nom": "Poissonnerie"
-            },
-            "quantite": 0,
-            "fait": false
-        },
-        {
-            "nom": "Oignons",
-            "rayon": {
-                "nom": "Légumes"
-            },
-            "quantite": 1,
             "fait": false
         }
     ]
