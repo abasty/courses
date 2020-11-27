@@ -4,6 +4,9 @@ import 'dart:convert' show jsonDecode, jsonEncode;
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart' show rootBundle;
+
+// <https://stackoverflow.com/questions/44816042/flutter-read-text-file-from-assets>
 
 part 'main.g.dart';
 

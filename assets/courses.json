@@ -1,0 +1,146 @@
+{
+    "rayonTable": [
+        {
+            "nom": "Divers"
+        },
+        {
+            "nom": "Boucherie"
+        },
+        {
+            "nom": "Légumes"
+        },
+        {
+            "nom": "Fruits"
+        },
+        {
+            "nom": "Epicerie"
+        },
+        {
+            "nom": "Frais"
+        },
+        {
+            "nom": "Fromagerie"
+        },
+        {
+            "nom": "Poissonnerie"
+        },
+        {
+            "nom": "Surgelés"
+        },
+        {
+            "nom": "Boulangerie"
+        },
+        {
+            "nom": "Hygiène"
+        },
+        {
+            "nom": "Boisson"
+        }
+    ],
+    "produitTable": [
+        {
+            "nom": "Escalope de porc",
+            "rayon": {
+                "nom": "Boucherie"
+            },
+            "quantite": 5,
+            "fait": false
+        },
+        {
+            "nom": "Gîte de boeuf",
+            "rayon": {
+                "nom": "Boucherie"
+            },
+            "quantite": 2,
+            "fait": false
+        },
+        {
+            "nom": "Paleron de boeuf",
+            "rayon": {
+                "nom": "Boucherie"
+            },
+            "quantite": 1,
+            "fait": false
+        },
+        {
+            "nom": "Pomme de terre",
+            "rayon": {
+                "nom": "Légumes"
+            },
+            "quantite": 2,
+            "fait": false
+        },
+        {
+            "nom": "Carotte",
+            "rayon": {
+                "nom": "Légumes"
+            },
+            "quantite": 0,
+            "fait": false
+        },
+        {
+            "nom": "Poireau",
+            "rayon": {
+                "nom": "Légumes"
+            },
+            "quantite": 0,
+            "fait": false
+        },
+        {
+            "nom": "Sel",
+            "rayon": {
+                "nom": "Epicerie"
+            },
+            "quantite": 3,
+            "fait": false
+        },
+        {
+            "nom": "Poivre",
+            "rayon": {
+                "nom": "Epicerie"
+            },
+            "quantite": 0,
+            "fait": false
+        },
+        {
+            "nom": "Huile",
+            "rayon": {
+                "nom": "Epicerie"
+            },
+            "quantite": 0,
+            "fait": false
+        },
+        {
+            "nom": "Yaourt",
+            "rayon": {
+                "nom": "Frais"
+            },
+            "quantite": 1,
+            "fait": false
+        },
+        {
+            "nom": "Fromages",
+            "rayon": {
+                "nom": "Fromagerie"
+            },
+            "quantite": 0,
+            "fait": false
+        },
+        {
+            "nom": "Poissons",
+            "rayon": {
+                "nom": "Poissonnerie"
+            },
+            "quantite": 0,
+            "fait": false
+        },
+        {
+            "nom": "Oignons",
+            "rayon": {
+                "nom": "Légumes"
+            },
+            "quantite": 1,
+            "fait": false
+        }
+    ]
+}
