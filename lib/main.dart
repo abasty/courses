@@ -1,7 +1,9 @@
-import 'dart:convert' show jsonDecode;
+import 'dart:io';
+import 'dart:convert' show jsonDecode, jsonEncode;
 
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:path_provider/path_provider.dart';
 
 part 'main.g.dart';
 
@@ -101,9 +103,16 @@ class DB {
     final directory = await getApplicationDocumentsDirectory();
     final path = directory.path + "/courses.json";
     final file = File(path);
-    fromJson(jsonDecode(await file.readAsString()));
+    fromJson(jsonDecode(file.readAsStringSync()));
   }
 
+  Future<void> writeDBFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final path = directory.path + "/courses.json";
+    final file = File(path);
+    file.writeAsStringSync(jsonEncode(toJson()));
+  }
+/*
   Future<int> readDB() async {
     try {
       final file = await _localFile;
@@ -123,7 +132,7 @@ class DB {
 
     // Write the file
     return file.writeAsString('$DB');
-  }
+  }*/
 }
 
 class CoursesApp extends StatefulWidget {
