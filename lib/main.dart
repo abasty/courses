@@ -103,7 +103,12 @@ class DB {
     final directory = await getApplicationDocumentsDirectory();
     final path = directory.path + "/courses.json";
     final file = File(path);
-    fromJson(jsonDecode(file.readAsStringSync()));
+    if (file.existsSync()) {
+      fromJson(jsonDecode(file.readAsStringSync()));
+    } else {
+      // Load from bundle assets
+      print("File does not exist");
+    }
   }
 
   Future<void> writeDBFile() async {
