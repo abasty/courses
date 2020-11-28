@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:window_size/window_size.dart';
 
 part 'main.g.dart';
 
@@ -134,6 +135,8 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    setWindowTitle('Exemple Courses');
+    setWindowFrame(Rect.fromLTRB(0, 0, 400, 600));
     _db.readDBFile().then((_) => setState(() {}));
     _tabController = TabController(vsync: this, length: 2)
       ..addListener(
