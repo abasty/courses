@@ -108,7 +108,6 @@ class DB {
     if (file.existsSync()) {
       json = file.readAsStringSync();
     } else {
-      // Load from bundle assets
       json = await rootBundle.loadString("assets/courses.json");
     }
     fromJson(jsonDecode(json));
@@ -120,27 +119,6 @@ class DB {
     final file = File(path);
     file.writeAsStringSync(jsonEncode(toJson()));
   }
-/*
-  Future<int> readDB() async {
-    try {
-      final file = await _localFile;
-
-      // Read the file
-      String contents = await file.readAsString();
-
-      return int.parse(contents);
-    } catch (e) {
-      // If encountering an error, return 0
-      return 0;
-    }
-  }
-
-  Future<File> writeDB() async {
-    final file = await _localFile;
-
-    // Write the file
-    return file.writeAsString('$DB');
-  }*/
 }
 
 class CoursesApp extends StatefulWidget {
@@ -182,6 +160,7 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         title: Text('Courses'),
+        toolbarHeight: 48,
         bottom: TabBar(
           controller: _tabController,
           tabs: [
