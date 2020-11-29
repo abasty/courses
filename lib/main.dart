@@ -163,7 +163,6 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         title: Text('Courses'),
-        toolbarHeight: 48,
         bottom: TabBar(
           controller: _tabController,
           tabs: [
