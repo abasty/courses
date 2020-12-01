@@ -92,11 +92,13 @@ class ModeleCourses {
     writeToFile();
   }
 
-  void changeOuAjouteProduit(Produit p, Rayon r) {
-    p.rayon = r;
-    var produit =
-        produits.firstWhere((e) => e.nom == p.nom, orElse: () => null);
-    if (produit == null) modele.produits.add(p);
+  void majProduit(Produit p, Produit maj) {
+    if (p == null)
+      modele.produits.add(maj);
+    else {
+      p.nom = maj.nom;
+      p.rayon = maj.rayon;
+    }
     writeToFile();
   }
 
@@ -206,7 +208,7 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
         child: Icon(_actionIcon),
         onPressed: () {
           if (_tabController.index == 0) {
-            _editeProduit(context, "");
+            _editeProduit(context, null);
           } else {
             setState(() => modele.retireFaits());
           }
@@ -246,7 +248,7 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
             _itemTap(p);
           },
           onLongPress: () {
-            _editeProduit(context, p.nom);
+            _editeProduit(context, p);
           },
         );
       },
@@ -282,12 +284,13 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
     setState(() => modele.produitInverse(p));
   }
 
-  void _editeProduit(BuildContext context, String nom) async {
+  void _editeProduit(BuildContext context, Produit p) async {
     await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ProduitForm(nom),
-        ));
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditProduitForm(p),
+      ),
+    );
     setState(() {});
   }
 
@@ -296,30 +299,26 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
   }
 }
 
-class ProduitForm extends StatefulWidget {
-  final String _nom;
+class EditProduitForm extends StatefulWidget {
+  final Produit _p;
 
-  ProduitForm(this._nom);
+  EditProduitForm(this._p);
 
   @override
-  ProduitFormState createState() {
-    return ProduitFormState(_nom);
+  EditProduitFormState createState() {
+    return EditProduitFormState(_p);
   }
 }
 
-class ProduitFormState extends State<ProduitForm> {
+class EditProduitFormState extends State<EditProduitForm> {
   final _formKey = GlobalKey<FormState>();
+  final Produit _init;
+  Produit _maj;
 
-  Produit _produit;
-  Rayon _rayon;
-  bool _new;
-
-  ProduitFormState(String nom) {
-    _produit =
-        modele.produits.firstWhere((p) => p.nom == nom, orElse: () => null);
-    _new = _produit == null;
-    if (_new) _produit = Produit("", modele.rayonDivers);
-    _rayon = _produit.rayon;
+  EditProduitFormState(this._init) {
+    _init != null
+        ? _maj = Produit(_init.nom, _init.rayon)
+        : _maj = Produit("", modele.rayonDivers);
   }
 
   @override
@@ -327,7 +326,7 @@ class ProduitFormState extends State<ProduitForm> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(icon: Icon(Icons.clear), onPressed: _annulePressed),
-        title: Text(_new ? "Création" : "Edition"),
+        title: Text(_init == null ? "Création" : "Édition"),
         centerTitle: true,
         actions: <Widget>[
           IconButton(
@@ -350,7 +349,7 @@ class ProduitFormState extends State<ProduitForm> {
 
   void _validePressed() {
     if (_formKey.currentState.validate()) {
-      modele.changeOuAjouteProduit(_produit, _rayon);
+      modele.majProduit(_init, _maj);
       Navigator.pop(context);
     }
   }
@@ -363,12 +362,8 @@ class ProduitFormState extends State<ProduitForm> {
           return RadioListTile<Rayon>(
             title: Text(modele.rayons[index].nom),
             value: modele.rayons[index],
-            groupValue: _rayon,
-            onChanged: (Rayon value) {
-              setState(() {
-                _rayon = value;
-              });
-            },
+            groupValue: _maj.rayon,
+            onChanged: (Rayon r) => setState(() => _maj.rayon = r),
           );
         },
       ),
@@ -381,12 +376,12 @@ class ProduitFormState extends State<ProduitForm> {
         labelText: 'Nom*',
         hintText: 'Nom du produit',
       ),
-      initialValue: _produit.nom,
-      validator: (value) {
-        if (value.length < 2) {
+      initialValue: _maj.nom,
+      validator: (nom) {
+        if (nom.length < 2) {
           return 'Le nom doit contenir au moins deux caractères';
         } else {
-          _produit.nom = value;
+          _maj.nom = nom;
           return null;
         }
       },
