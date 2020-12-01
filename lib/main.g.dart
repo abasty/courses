@@ -36,17 +36,17 @@ Map<String, dynamic> _$ProduitToJson(Produit instance) => <String, dynamic>{
 
 ModeleCourses _$DBFromJson(Map<String, dynamic> json) {
   return ModeleCourses()
-    ..rayonTable = (json['rayonTable'] as List)
+    ..rayons = (json['rayonTable'] as List)
         ?.map(
             (e) => e == null ? null : Rayon.fromJson(e as Map<String, dynamic>))
         ?.toList()
-    ..produitTable = (json['produitTable'] as List)
+    ..produits = (json['produitTable'] as List)
         ?.map((e) =>
             e == null ? null : Produit.fromJson(e as Map<String, dynamic>))
         ?.toList();
 }
 
 Map<String, dynamic> _$DBToJson(ModeleCourses instance) => <String, dynamic>{
-      'rayonTable': instance.rayonTable?.map((e) => e?.toJson())?.toList(),
-      'produitTable': instance.produitTable?.map((e) => e?.toJson())?.toList(),
+      'rayonTable': instance.rayons?.map((e) => e?.toJson())?.toList(),
+      'produitTable': instance.produits?.map((e) => e?.toJson())?.toList(),
     };

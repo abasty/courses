@@ -34,8 +34,8 @@ class Produit {
 
 @JsonSerializable(explicitToJson: true)
 class ModeleCourses {
-  List<Rayon> rayonTable = [];
-  List<Produit> produitTable = [];
+  List<Rayon> rayons = [];
+  List<Produit> produits = [];
 
   @JsonKey(ignore: true)
   Rayon rayonDivers;
@@ -50,6 +50,7 @@ class ModeleCourses {
       listeSelect.sort((a, b) => a.rayon.nom.compareTo(b.rayon.nom));
     }
     p.fait = false;
+    writeToFile();
   }
 
   void produitMoins(Produit p) {
@@ -59,6 +60,7 @@ class ModeleCourses {
       listeSelect.remove(p);
     }
     p.fait = false;
+    writeToFile();
   }
 
   void produitZero(Produit p) {
@@ -66,6 +68,16 @@ class ModeleCourses {
     p.quantite = 0;
     listeSelect.remove(p);
     p.fait = false;
+    writeToFile();
+  }
+
+  void produitInverse(Produit p) {
+    p.quantite == 0 ? modele.produitPlus(p) : modele.produitZero(p);
+  }
+
+  void produitMarque(Produit p, value) {
+    p.fait = value;
+    writeToFile();
   }
 
   void retireFaits() {
@@ -77,25 +89,34 @@ class ModeleCourses {
       }
       return fait;
     });
+    writeToFile();
+  }
+
+  void changeOuAjouteProduit(Produit p, Rayon r) {
+    p.rayon = r;
+    var produit =
+        produits.firstWhere((e) => e.nom == p.nom, orElse: () => null);
+    if (produit == null) modele.produits.add(p);
+    writeToFile();
   }
 
   void fromJson(Map<String, dynamic> json) {
     Produit produitFromElement(dynamic e) {
       if (e == null) return null;
       Produit p = Produit.fromJson(e as Map<String, dynamic>);
-      Rayon r = rayonTable.singleWhere((e) => e.nom == p.rayon.nom);
+      Rayon r = rayons.singleWhere((e) => e.nom == p.rayon.nom);
       p.rayon = r;
       return p;
     }
 
-    rayonTable = (json['rayonTable'] as List)
+    rayons = (json['rayonTable'] as List)
         ?.map(
             (e) => e == null ? null : Rayon.fromJson(e as Map<String, dynamic>))
         ?.toList();
-    produitTable =
+    produits =
         (json['produitTable'] as List)?.map(produitFromElement)?.toList();
-    rayonDivers = rayonTable.singleWhere((e) => e.nom == "Divers");
-    listeSelect.addAll(produitTable.where((e) => e.quantite > 0));
+    rayonDivers = rayons.singleWhere((e) => e.nom == "Divers");
+    listeSelect.addAll(produits.where((e) => e.quantite > 0));
   }
 
   factory ModeleCourses.fromJson(Map<String, dynamic> json) =>
@@ -188,7 +209,6 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
             _editeProduit(context, "");
           } else {
             setState(() => modele.retireFaits());
-            modele.writeToFile();
           }
         },
       ),
@@ -197,9 +217,9 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
 
   Widget _buildTabProduits() {
     return ListView.builder(
-      itemCount: modele.produitTable.length,
+      itemCount: modele.produits.length,
       itemBuilder: (context, index) {
-        Produit p = modele.produitTable[index];
+        Produit p = modele.produits[index];
         return ListTile(
           title: Text(p.nom),
           subtitle: Text(p.rayon.nom),
@@ -252,18 +272,14 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
 
   void _iconMoinsPressed(Produit p) {
     setState(() => modele.produitMoins(p));
-    modele.writeToFile();
   }
 
   void _iconPlusPressed(Produit p) {
     setState(() => modele.produitPlus(p));
-    modele.writeToFile();
   }
 
   void _itemTap(Produit p) {
-    setState(
-        () => p.quantite == 0 ? modele.produitPlus(p) : modele.produitZero(p));
-    modele.writeToFile();
+    setState(() => modele.produitInverse(p));
   }
 
   void _editeProduit(BuildContext context, String nom) async {
@@ -276,8 +292,7 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
   }
 
   void _checkBoxChanged(Produit p, bool value) {
-    setState(() => p.fait = value);
-    modele.writeToFile();
+    setState(() => modele.produitMarque(p, value));
   }
 }
 
@@ -301,7 +316,7 @@ class ProduitFormState extends State<ProduitForm> {
 
   ProduitFormState(String nom) {
     _produit =
-        modele.produitTable.firstWhere((p) => p.nom == nom, orElse: () => null);
+        modele.produits.firstWhere((p) => p.nom == nom, orElse: () => null);
     _new = _produit == null;
     if (_new) _produit = Produit("", modele.rayonDivers);
     _rayon = _produit.rayon;
@@ -335,9 +350,7 @@ class ProduitFormState extends State<ProduitForm> {
 
   void _validePressed() {
     if (_formKey.currentState.validate()) {
-      if (_new) modele.produitTable.add(_produit);
-      _produit.rayon = _rayon;
-      modele.writeToFile();
+      modele.changeOuAjouteProduit(_produit, _rayon);
       Navigator.pop(context);
     }
   }
@@ -345,11 +358,11 @@ class ProduitFormState extends State<ProduitForm> {
   Widget _buildRayonButtons() {
     return Expanded(
       child: ListView.builder(
-        itemCount: modele.rayonTable.length,
+        itemCount: modele.rayons.length,
         itemBuilder: (context, index) {
           return RadioListTile<Rayon>(
-            title: Text(modele.rayonTable[index].nom),
-            value: modele.rayonTable[index],
+            title: Text(modele.rayons[index].nom),
+            value: modele.rayons[index],
             groupValue: _rayon,
             onChanged: (Rayon value) {
               setState(() {
