@@ -328,7 +328,7 @@ class EditProduitFormState extends State<EditProduitForm> {
         leading: IconButton(icon: Icon(Icons.clear), onPressed: _annulePressed),
         title: Text(_init == null ? "Création" : "Édition"),
         centerTitle: true,
-        actions: <Widget>[
+        actions: [
           IconButton(
             icon: Icon(Icons.check),
             onPressed: _validePressed,
@@ -338,7 +338,7 @@ class EditProduitFormState extends State<EditProduitForm> {
       ),
       body: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Builder(builder: (context) => _buildForm()),
+        child: _buildForm(),
       ),
     );
   }
