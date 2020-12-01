@@ -343,21 +343,22 @@ class ProduitFormState extends State<ProduitForm> {
 
   Widget _buildRayonButtons() {
     return Expanded(
-        child: ListView.builder(
-      itemCount: _db.rayonTable.length,
-      itemBuilder: (context, index) {
-        return RadioListTile<Rayon>(
-          title: Text(_db.rayonTable[index].nom),
-          value: _db.rayonTable[index],
-          groupValue: _rayon,
-          onChanged: (Rayon value) {
-            setState(() {
-              _rayon = value;
-            });
-          },
-        );
-      },
-    ));
+      child: ListView.builder(
+        itemCount: _db.rayonTable.length,
+        itemBuilder: (context, index) {
+          return RadioListTile<Rayon>(
+            title: Text(_db.rayonTable[index].nom),
+            value: _db.rayonTable[index],
+            groupValue: _rayon,
+            onChanged: (Rayon value) {
+              setState(() {
+                _rayon = value;
+              });
+            },
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildProduitNom() {
