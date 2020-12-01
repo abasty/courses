@@ -33,7 +33,7 @@ class Produit {
 }
 
 @JsonSerializable(explicitToJson: true)
-class DB {
+class ModeleCourses {
   List<Rayon> rayonTable = [];
   List<Produit> produitTable = [];
 
@@ -42,7 +42,7 @@ class DB {
   @JsonKey(ignore: true)
   List<Produit> listeSelect = [];
 
-  DB();
+  ModeleCourses();
 
   void produitPlus(Produit p) {
     if (++p.quantite == 1) {
@@ -98,10 +98,11 @@ class DB {
     listeSelect.addAll(produitTable.where((e) => e.quantite > 0));
   }
 
-  factory DB.fromJson(Map<String, dynamic> json) => _$DBFromJson(json);
+  factory ModeleCourses.fromJson(Map<String, dynamic> json) =>
+      _$DBFromJson(json);
   Map<String, dynamic> toJson() => _$DBToJson(this);
 
-  Future<void> readDBFile() async {
+  Future<void> readFromFile() async {
     final directory = await getApplicationDocumentsDirectory();
     final path = directory.path + "/courses.json";
     final file = File(path);
@@ -114,13 +115,15 @@ class DB {
     fromJson(jsonDecode(json));
   }
 
-  Future<void> writeDBFile() async {
+  Future<void> writeToFile() async {
     final directory = await getApplicationDocumentsDirectory();
     final path = directory.path + "/courses.json";
     final file = File(path);
     file.writeAsStringSync(jsonEncode(toJson()));
   }
 }
+
+var modele = ModeleCourses();
 
 class CoursesApp extends StatefulWidget {
   @override
@@ -130,14 +133,13 @@ class CoursesApp extends StatefulWidget {
 class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
   TabController _tabController;
   var _actionIcon = Icons.add;
-  final _db = DB();
 
   @override
   void initState() {
     super.initState();
     setWindowTitle('Exemple Courses');
     setWindowFrame(Rect.fromLTRB(0, 0, 400, 600));
-    _db.readDBFile().then((_) => setState(() {}));
+    modele.readFromFile().then((_) => setState(() {}));
     _tabController = TabController(vsync: this, length: 2)
       ..addListener(
         () {
@@ -185,8 +187,8 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
           if (_tabController.index == 0) {
             _editeProduit(context, "");
           } else {
-            setState(() => _db.retireFaits());
-            _db.writeDBFile();
+            setState(() => modele.retireFaits());
+            modele.writeToFile();
           }
         },
       ),
@@ -195,9 +197,9 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
 
   Widget _buildTabProduits() {
     return ListView.builder(
-      itemCount: _db.produitTable.length,
+      itemCount: modele.produitTable.length,
       itemBuilder: (context, index) {
-        Produit p = _db.produitTable[index];
+        Produit p = modele.produitTable[index];
         return ListTile(
           title: Text(p.nom),
           subtitle: Text(p.rayon.nom),
@@ -233,9 +235,9 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
 
   Widget _buildTabListe() {
     return ListView.builder(
-      itemCount: _db.listeSelect.length,
+      itemCount: modele.listeSelect.length,
       itemBuilder: (context, index) {
-        Produit p = _db.listeSelect[index];
+        Produit p = modele.listeSelect[index];
         return CheckboxListTile(
           title: Text("${p.nom} ${p.quantite > 1 ? '(${p.quantite})' : ''}"),
           subtitle: Text(p.rayon.nom),
@@ -249,60 +251,59 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
   }
 
   void _iconMoinsPressed(Produit p) {
-    setState(() => _db.produitMoins(p));
-    _db.writeDBFile();
+    setState(() => modele.produitMoins(p));
+    modele.writeToFile();
   }
 
   void _iconPlusPressed(Produit p) {
-    setState(() => _db.produitPlus(p));
-    _db.writeDBFile();
+    setState(() => modele.produitPlus(p));
+    modele.writeToFile();
   }
 
   void _itemTap(Produit p) {
-    setState(() => p.quantite == 0 ? _db.produitPlus(p) : _db.produitZero(p));
-    _db.writeDBFile();
+    setState(
+        () => p.quantite == 0 ? modele.produitPlus(p) : modele.produitZero(p));
+    modele.writeToFile();
   }
 
   void _editeProduit(BuildContext context, String nom) async {
     await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ProduitForm(nom, _db),
+          builder: (context) => ProduitForm(nom),
         ));
     setState(() {});
   }
 
   void _checkBoxChanged(Produit p, bool value) {
     setState(() => p.fait = value);
-    _db.writeDBFile();
+    modele.writeToFile();
   }
 }
 
 class ProduitForm extends StatefulWidget {
   final String _nom;
-  final DB _db;
 
-  ProduitForm(this._nom, this._db);
+  ProduitForm(this._nom);
 
   @override
   ProduitFormState createState() {
-    return ProduitFormState(_nom, _db);
+    return ProduitFormState(_nom);
   }
 }
 
 class ProduitFormState extends State<ProduitForm> {
   final _formKey = GlobalKey<FormState>();
-  final DB _db;
 
   Produit _produit;
   Rayon _rayon;
   bool _new;
 
-  ProduitFormState(String nom, this._db) {
+  ProduitFormState(String nom) {
     _produit =
-        _db.produitTable.firstWhere((p) => p.nom == nom, orElse: () => null);
+        modele.produitTable.firstWhere((p) => p.nom == nom, orElse: () => null);
     _new = _produit == null;
-    if (_new) _produit = Produit("", _db.rayonDivers);
+    if (_new) _produit = Produit("", modele.rayonDivers);
     _rayon = _produit.rayon;
   }
 
@@ -334,9 +335,9 @@ class ProduitFormState extends State<ProduitForm> {
 
   void _validePressed() {
     if (_formKey.currentState.validate()) {
-      if (_new) _db.produitTable.add(_produit);
+      if (_new) modele.produitTable.add(_produit);
       _produit.rayon = _rayon;
-      _db.writeDBFile();
+      modele.writeToFile();
       Navigator.pop(context);
     }
   }
@@ -344,11 +345,11 @@ class ProduitFormState extends State<ProduitForm> {
   Widget _buildRayonButtons() {
     return Expanded(
       child: ListView.builder(
-        itemCount: _db.rayonTable.length,
+        itemCount: modele.rayonTable.length,
         itemBuilder: (context, index) {
           return RadioListTile<Rayon>(
-            title: Text(_db.rayonTable[index].nom),
-            value: _db.rayonTable[index],
+            title: Text(modele.rayonTable[index].nom),
+            value: modele.rayonTable[index],
             groupValue: _rayon,
             onChanged: (Rayon value) {
               setState(() {
