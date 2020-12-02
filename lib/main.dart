@@ -100,6 +100,7 @@ class ModeleCourses {
       p.rayon = maj.rayon;
     }
     writeToFile();
+    print("MAJ modèle faite");
   }
 
   void fromJson(Map<String, dynamic> json) {
@@ -143,6 +144,7 @@ class ModeleCourses {
     final path = directory.path + "/courses.json";
     final file = File(path);
     file.writeAsStringSync(jsonEncode(toJson()));
+    print("Sauvegarde faite");
   }
 }
 
