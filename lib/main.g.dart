@@ -34,8 +34,8 @@ Map<String, dynamic> _$ProduitToJson(Produit instance) => <String, dynamic>{
       'fait': instance.fait,
     };
 
-ModeleCourses _$DBFromJson(Map<String, dynamic> json) {
-  return ModeleCourses()
+ModeleCoursesSingleton _$DBFromJson(Map<String, dynamic> json) {
+  return ModeleCoursesSingleton()
     ..rayons = (json['rayonTable'] as List)
         ?.map(
             (e) => e == null ? null : Rayon.fromJson(e as Map<String, dynamic>))
@@ -46,7 +46,8 @@ ModeleCourses _$DBFromJson(Map<String, dynamic> json) {
         ?.toList();
 }
 
-Map<String, dynamic> _$DBToJson(ModeleCourses instance) => <String, dynamic>{
+Map<String, dynamic> _$DBToJson(ModeleCoursesSingleton instance) =>
+    <String, dynamic>{
       'rayonTable': instance.rayons?.map((e) => e?.toJson())?.toList(),
       'produitTable': instance.produits?.map((e) => e?.toJson())?.toList(),
     };

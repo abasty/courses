@@ -33,7 +33,7 @@ class Produit {
 }
 
 @JsonSerializable(explicitToJson: true)
-class ModeleCourses {
+class ModeleCoursesSingleton {
   List<Rayon> rayons = [];
   List<Produit> produits = [];
 
@@ -42,7 +42,14 @@ class ModeleCourses {
   @JsonKey(ignore: true)
   List<Produit> listeSelect = [];
 
-  ModeleCourses();
+  ModeleCoursesSingleton._privateConstructor();
+
+  static final ModeleCoursesSingleton _instance =
+      ModeleCoursesSingleton._privateConstructor();
+
+  factory ModeleCoursesSingleton() {
+    return _instance;
+  }
 
   void produitPlus(Produit p) {
     if (++p.quantite == 1) {
@@ -122,7 +129,7 @@ class ModeleCourses {
     listeSelect.addAll(produits.where((e) => e.quantite > 0));
   }
 
-  factory ModeleCourses.fromJson(Map<String, dynamic> json) =>
+  factory ModeleCoursesSingleton.fromJson(Map<String, dynamic> json) =>
       _$DBFromJson(json);
   Map<String, dynamic> toJson() => _$DBToJson(this);
 
@@ -148,7 +155,7 @@ class ModeleCourses {
   }
 }
 
-var modele = ModeleCourses();
+var modele = ModeleCoursesSingleton();
 
 class CoursesApp extends StatefulWidget {
   @override
