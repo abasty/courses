@@ -106,6 +106,7 @@ class ModeleCoursesSingleton {
       p.nom = maj.nom;
       p.rayon = maj.rayon;
     }
+    produits.sort((a, b) => a.rayon.nom.compareTo(b.rayon.nom));
     writeToFile();
     print("MAJ modèle faite");
   }
