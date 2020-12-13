@@ -51,7 +51,7 @@ class ModeleCoursesSingleton {
     return _instance;
   }
 
-  void produitPlus(Produit p) {
+  void ctrlProduitPlus(Produit p) {
     if (++p.quantite == 1) {
       listeSelect.add(p);
       listeSelect.sort((a, b) => a.rayon.nom.compareTo(b.rayon.nom));
@@ -60,7 +60,7 @@ class ModeleCoursesSingleton {
     writeToFile();
   }
 
-  void produitMoins(Produit p) {
+  void ctrlProduitMoins(Produit p) {
     if (p.quantite == 0) return;
 
     if (--p.quantite == 0) {
@@ -70,7 +70,7 @@ class ModeleCoursesSingleton {
     writeToFile();
   }
 
-  void produitZero(Produit p) {
+  void ctrlProduitRaz(Produit p) {
     if (p.quantite == 0) return;
     p.quantite = 0;
     listeSelect.remove(p);
@@ -78,16 +78,16 @@ class ModeleCoursesSingleton {
     writeToFile();
   }
 
-  void produitInverse(Produit p) {
-    p.quantite == 0 ? modele.produitPlus(p) : modele.produitZero(p);
+  void ctrlProduitInverse(Produit p) {
+    p.quantite == 0 ? modele.ctrlProduitPlus(p) : modele.ctrlProduitRaz(p);
   }
 
-  void produitMarque(Produit p, value) {
+  void ctrlProduitPrend(Produit p, value) {
     p.fait = value;
     writeToFile();
   }
 
-  void retireFaits() {
+  void ctrlValideChariot() {
     listeSelect.removeWhere((p) {
       bool fait = p.fait;
       if (fait) {
@@ -99,7 +99,7 @@ class ModeleCoursesSingleton {
     writeToFile();
   }
 
-  void majProduit(Produit p, Produit maj) {
+  void ctrlMajProduit(Produit p, Produit maj) {
     if (p == null)
       modele.produits.add(maj);
     else {
@@ -220,7 +220,7 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
           if (_tabController.index == 0) {
             _editeProduit(context, null);
           } else {
-            setState(() => modele.retireFaits());
+            setState(() => modele.ctrlValideChariot());
           }
         },
       ),
@@ -283,15 +283,15 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
   }
 
   void _iconMoinsPressed(Produit p) {
-    setState(() => modele.produitMoins(p));
+    setState(() => modele.ctrlProduitMoins(p));
   }
 
   void _iconPlusPressed(Produit p) {
-    setState(() => modele.produitPlus(p));
+    setState(() => modele.ctrlProduitPlus(p));
   }
 
   void _itemTap(Produit p) {
-    setState(() => modele.produitInverse(p));
+    setState(() => modele.ctrlProduitInverse(p));
   }
 
   void _editeProduit(BuildContext context, Produit p) async {
@@ -301,11 +301,11 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
         builder: (context) => EditProduitForm(p),
       ),
     );
-    setState(() {});
+    setState(null);
   }
 
   void _checkBoxChanged(Produit p, bool value) {
-    setState(() => modele.produitMarque(p, value));
+    setState(() => modele.ctrlProduitPrend(p, value));
   }
 }
 
@@ -359,7 +359,7 @@ class EditProduitFormState extends State<EditProduitForm> {
 
   void _validePressed() {
     if (_formKey.currentState.validate()) {
-      modele.majProduit(_init, _maj);
+      modele.ctrlMajProduit(_init, _maj);
       Navigator.pop(context);
     }
   }
