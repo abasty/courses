@@ -240,17 +240,17 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
             children: [
               IconButton(
                 icon: Icon(Icons.remove_circle),
-                onPressed: () => _iconMoinsPressed(p),
+                onPressed: () => setState(() => modele.ctrlProduitMoins(p)),
               ),
               Text(p.quantite.toString()),
               IconButton(
                 icon: Icon(Icons.add_circle),
-                onPressed: () => _iconPlusPressed(p),
+                onPressed: () => setState(() => modele.ctrlProduitPlus(p)),
               ),
             ],
           ),
           selected: p.quantite > 0,
-          onTap: () => _itemTap(p),
+          onTap: () => setState(() => modele.ctrlProduitInverse(p)),
           onLongPress: () => _editeProduit(context, p),
         );
       },
@@ -266,22 +266,11 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
           title: Text("${p.nom} ${p.quantite > 1 ? '(${p.quantite})' : ''}"),
           subtitle: Text(p.rayon.nom),
           value: p.fait,
-          onChanged: (bool value) => _checkBoxChanged(p, value),
+          onChanged: (bool value) =>
+              setState(() => modele.ctrlProduitPrend(p, value)),
         );
       },
     );
-  }
-
-  void _iconMoinsPressed(Produit p) {
-    setState(() => modele.ctrlProduitMoins(p));
-  }
-
-  void _iconPlusPressed(Produit p) {
-    setState(() => modele.ctrlProduitPlus(p));
-  }
-
-  void _itemTap(Produit p) {
-    setState(() => modele.ctrlProduitInverse(p));
   }
 
   void _editeProduit(BuildContext context, Produit p) async {
@@ -292,10 +281,6 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
       ),
     );
     setState(null);
-  }
-
-  void _checkBoxChanged(Produit p, bool value) {
-    setState(() => modele.ctrlProduitPrend(p, value));
   }
 }
 
