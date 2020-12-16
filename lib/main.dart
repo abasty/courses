@@ -240,26 +240,18 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
             children: [
               IconButton(
                 icon: Icon(Icons.remove_circle),
-                onPressed: () {
-                  _iconMoinsPressed(p);
-                },
+                onPressed: () => _iconMoinsPressed(p),
               ),
               Text(p.quantite.toString()),
               IconButton(
                 icon: Icon(Icons.add_circle),
-                onPressed: () {
-                  _iconPlusPressed(p);
-                },
+                onPressed: () => _iconPlusPressed(p),
               ),
             ],
           ),
           selected: p.quantite > 0,
-          onTap: () {
-            _itemTap(p);
-          },
-          onLongPress: () {
-            _editeProduit(context, p);
-          },
+          onTap: () => _itemTap(p),
+          onLongPress: () => _editeProduit(context, p),
         );
       },
     );
@@ -274,9 +266,7 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
           title: Text("${p.nom} ${p.quantite > 1 ? '(${p.quantite})' : ''}"),
           subtitle: Text(p.rayon.nom),
           value: p.fait,
-          onChanged: (bool value) {
-            _checkBoxChanged(p, value);
-          },
+          onChanged: (bool value) => _checkBoxChanged(p, value),
         );
       },
     );
