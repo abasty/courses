@@ -280,7 +280,7 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
         builder: (context) => EditProduitForm(p),
       ),
     );
-    setState(null);
+    setState(() {});
   }
 }
 
