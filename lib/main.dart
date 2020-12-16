@@ -175,15 +175,11 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
     modele.readFromFile().then((_) => setState(() {}));
     _tabController = TabController(vsync: this, length: 2)
       ..addListener(
-        () {
-          setState(
-            () {
-              _actionIcon = _tabController.index == 0
-                  ? Icons.add
-                  : Icons.remove_shopping_cart;
-            },
-          );
-        },
+        () => setState(
+          () => _tabController.index == 0
+              ? _actionIcon = Icons.add
+              : _actionIcon = Icons.remove_shopping_cart,
+        ),
       );
   }
 
@@ -216,13 +212,9 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
         child: Icon(_actionIcon),
-        onPressed: () {
-          if (_tabController.index == 0) {
-            _editeProduit(context, null);
-          } else {
-            setState(() => modele.ctrlValideChariot());
-          }
-        },
+        onPressed: () => _tabController.index == 0
+            ? _editeProduit(context, null)
+            : setState(() => modele.ctrlValideChariot()),
       ),
     );
   }
