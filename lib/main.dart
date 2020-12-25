@@ -58,6 +58,7 @@ class ModeleCoursesSingleton {
     }
     p.fait = false;
     writeToFile();
+    print("MAJ modèle faite");
   }
 
   void ctrlProduitMoins(Produit p) {
@@ -108,7 +109,6 @@ class ModeleCoursesSingleton {
     }
     produits.sort((a, b) => a.rayon.nom.compareTo(b.rayon.nom));
     writeToFile();
-    print("MAJ modèle faite");
   }
 
   void fromJson(Map<String, dynamic> json) {
