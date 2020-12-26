@@ -235,7 +235,7 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
                 icon: Icon(Icons.remove_circle),
                 onPressed: () => setState(() => modele.ctrlProduitMoins(p)),
               ),
-              Text(p.quantite.toString()),
+              Text("${p.quantite}"),
               IconButton(
                 icon: Icon(Icons.add_circle),
                 onPressed: () => setState(() => modele.ctrlProduitPlus(p)),
