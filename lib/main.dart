@@ -1,5 +1,6 @@
 import 'dart:convert' show jsonDecode, jsonEncode;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:localstorage/localstorage.dart';
@@ -166,8 +167,11 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    setWindowTitle('Exemple Courses');
-    setWindowFrame(Rect.fromLTRB(0, 0, 400, 600));
+
+    if (!kIsWeb) {
+      setWindowTitle('Exemple Courses');
+      setWindowFrame(Rect.fromLTRB(0, 0, 400, 600));
+    }
 
     modele.readFromFile().then((_) => setState(() {}));
     _tabController = TabController(vsync: this, length: 2)
