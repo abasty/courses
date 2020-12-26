@@ -1,9 +1,8 @@
-import 'dart:io';
 import 'dart:convert' show jsonDecode, jsonEncode;
 
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:window_size/window_size.dart';
 
@@ -41,6 +40,8 @@ class ModeleCoursesSingleton {
   Rayon rayonDivers;
   @JsonKey(ignore: true)
   List<Produit> listeSelect = [];
+
+  final _storage = LocalStorage('courses.json');
 
   ModeleCoursesSingleton._privateConstructor();
 
@@ -135,23 +136,18 @@ class ModeleCoursesSingleton {
   Map<String, dynamic> toJson() => _$DBToJson(this);
 
   Future<void> readFromFile() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final path = directory.path + "/courses.json";
-    final file = File(path);
     String json;
-    if (file.existsSync()) {
-      json = file.readAsStringSync();
-    } else {
+    await _storage.ready;
+    json = await _storage.getItem('modele');
+    if (json == null) {
       json = await rootBundle.loadString("assets/courses.json");
     }
     fromJson(jsonDecode(json));
   }
 
   Future<void> writeToFile() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final path = directory.path + "/courses.json";
-    final file = File(path);
-    file.writeAsStringSync(jsonEncode(toJson()));
+    await _storage.ready;
+    await _storage.setItem("modele", jsonEncode(toJson()));
     print("Sauvegarde faite");
   }
 }
@@ -172,6 +168,7 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
     super.initState();
     setWindowTitle('Exemple Courses');
     setWindowFrame(Rect.fromLTRB(0, 0, 400, 600));
+
     modele.readFromFile().then((_) => setState(() {}));
     _tabController = TabController(vsync: this, length: 2)
       ..addListener(

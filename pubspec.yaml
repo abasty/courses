@@ -24,7 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
   json_annotation: ^3.0.0
-  path_provider:
+  localstorage:
   window_size:
     git:
       url: git://github.com/google/flutter-desktop-embedding.git
