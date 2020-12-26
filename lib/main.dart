@@ -60,7 +60,7 @@ class ModeleCoursesSingleton {
     }
     p.fait = false;
     writeToFile();
-    print("MAJ modèle faite");
+    if (kDebugMode) print("MAJ modèle faite");
   }
 
   void ctrlProduitMoins(Produit p) {
@@ -149,7 +149,7 @@ class ModeleCoursesSingleton {
   Future<void> writeToFile() async {
     await _storage.ready;
     await _storage.setItem("modele", jsonEncode(toJson()));
-    print("Sauvegarde faite");
+    if (kDebugMode) print("Sauvegarde faite");
   }
 }
 
