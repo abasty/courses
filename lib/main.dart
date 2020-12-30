@@ -1,4 +1,5 @@
 import 'dart:convert' show jsonDecode, jsonEncode;
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -169,8 +170,10 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
     super.initState();
 
     if (!kIsWeb) {
-      setWindowTitle('Exemple Courses');
-      setWindowFrame(Rect.fromLTRB(0, 0, 400, 600));
+      if (Platform.isLinux) {
+        setWindowTitle('Exemple Courses');
+        setWindowFrame(Rect.fromLTRB(0, 0, 400, 600));
+      }
     }
 
     modele.readFromFile().then((_) => setState(() {}));
