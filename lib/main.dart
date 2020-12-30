@@ -353,6 +353,8 @@ class EditProduitFormState extends State<EditProduitForm> {
 
   Widget _buildProduitNom() {
     return TextFormField(
+      autofocus: true,
+      textCapitalization: TextCapitalization.sentences,
       decoration: const InputDecoration(
         labelText: 'Nom*',
         hintText: 'Nom du produit',
