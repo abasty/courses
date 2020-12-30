@@ -317,10 +317,7 @@ class EditProduitFormState extends State<EditProduitForm> {
         ],
         backgroundColor: Colors.deepPurple,
       ),
-      body: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: _buildForm(),
-      ),
+      body: _buildForm(),
     );
   }
 
@@ -340,11 +337,14 @@ class EditProduitFormState extends State<EditProduitForm> {
       child: ListView.builder(
         itemCount: modele.rayons.length,
         itemBuilder: (context, index) {
-          return RadioListTile<Rayon>(
-            title: Text(modele.rayons[index].nom),
-            value: modele.rayons[index],
-            groupValue: _maj.rayon,
-            onChanged: (Rayon r) => setState(() => _maj.rayon = r),
+          return Container(
+            height: 32,
+            child: RadioListTile<Rayon>(
+              title: Text(modele.rayons[index].nom),
+              value: modele.rayons[index],
+              groupValue: _maj.rayon,
+              onChanged: (Rayon r) => setState(() => _maj.rayon = r),
+            ),
           );
         },
       ),
@@ -377,7 +377,10 @@ class EditProduitFormState extends State<EditProduitForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildProduitNom(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: _buildProduitNom(),
+          ),
           _buildRayonButtons(),
         ],
       ),
