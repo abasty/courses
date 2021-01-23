@@ -5,17 +5,17 @@ const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
   "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "version.json": "00a2efd17f18a4a11ae096f1f6b432c5",
-"index.html": "c73e0fca8cc54f9ca3899a8328fd74ff",
-"/": "c73e0fca8cc54f9ca3899a8328fd74ff",
+"index.html": "f292168aab5b6c26c3386bd79bd982cd",
+"/": "f292168aab5b6c26c3386bd79bd982cd",
 "manifest.json": "46c7bc499af0a2132ab85f672b4e5bbd",
 "assets/FontManifest.json": "7b2a36307916a9721811788013e65289",
 "assets/assets/courses.json": "d18fa8b9f3d1543934403cf9e068ad94",
-"assets/NOTICES": "d3ad0707afc68d13d0248812dfb9756f",
+"assets/NOTICES": "134ad1a069a22659cb5fc13c1d98c5e6",
 "assets/AssetManifest.json": "4b2f12a6662587b408814532dabfff73",
 "assets/fonts/MaterialIcons-Regular.otf": "1288c9e28052e028aba623321f7826ac",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
-"main.dart.js": "bbdc84a998de43fb101540c3b63f8412"
+"main.dart.js": "19dbd5f81ff48156e06d51c56bc43e0a"
 };
 
 // The application shell files that are downloaded before a service worker can
@@ -159,7 +159,7 @@ async function downloadOffline() {
     }
     currentContent[key] = true;
   }
-  for (var resourceKey in Object.keys(RESOURCES)) {
+  for (var resourceKey of Object.keys(RESOURCES)) {
     if (!currentContent[resourceKey]) {
       resources.push(resourceKey);
     }
