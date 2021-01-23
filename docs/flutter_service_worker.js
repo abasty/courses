@@ -21,7 +21,7 @@ const RESOURCES = {
 // The application shell files that are downloaded before a service worker can
 // start.
 const CORE = [
-  "/",
+  "/courses/",
 "main.dart.js",
 "index.html",
 "assets/NOTICES",
@@ -32,6 +32,7 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
   return event.waitUntil(
     caches.open(TEMP).then((cache) => {
+      console.print("toto");
       return cache.addAll(
         CORE.map((value) => new Request(value + '?revision=' + RESOURCES[value], {'cache': 'reload'})));
     })
