@@ -1,0 +1,21 @@
+name: courses
+version: 0.1.0
+summary: Courses
+description: Une application Flutter pour faire ses courses.
+
+confinement: strict
+base: core18
+grade: stable
+
+apps:
+  courses:
+    command: courses
+    extensions: [flutter-dev]
+    plugs:
+    - network
+
+parts:
+  courses:
+    source: .
+    plugin: flutter
+    flutter-target: lib/main.dart
