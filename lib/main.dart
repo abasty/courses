@@ -166,6 +166,12 @@ class CoursesAppState extends State<CoursesApp> with TickerProviderStateMixin {
   var _actionIcon = Icons.add;
 
   @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
 
